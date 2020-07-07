@@ -4,10 +4,12 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Runner
-  m_Shader: {fileID: 4800000, guid: 8762ed8112639444fad3626d7816779e, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: b23d061081154ea44876f56f10dd8cbc,
+    type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
@@ -75,3 +77,4 @@ Material:
     m_Colors:
     - _Color: {r: 0.16268381, g: 0.43382353, b: 0.28796908, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []
