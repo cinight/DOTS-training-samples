@@ -140,7 +140,7 @@ GameObject:
   - component: {fileID: 2052799330}
   - component: {fileID: 2052799337}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: Pit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

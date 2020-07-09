@@ -13,11 +13,17 @@ public class RunnerSpawnSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        //Spawn 2 Entites everyframe
+        //Spawn 2 Runner everyframe
         Entities.WithStructuralChanges().ForEach((Entity e, in RunnerSpawnData runnerSpawnData) => 
         {
             spawnerEntity = e;
             newEntities = EntityManager.Instantiate(runnerSpawnData.runnerPrefab,2,Allocator.Temp);
+
+            //FOR DEBUGGING
+            for(int i=0; i < newEntities.Length; i++)
+            {
+                EntityManager.SetName(newEntities[i],"Runner");
+            }
         }).Run();
 
         //Get spawner settings
@@ -133,6 +139,9 @@ public class RunnerSpawnSystem : SystemBase
             for(int i=0; i < newBar.Length; i++)
             {
                 EntityManager.SetComponentData(newBar[i],new BelongsToRunnerData{entity = e});
+
+                //FOR DEBUGGING
+                EntityManager.SetName(newBar[i],"Runner Bar");
             }
         }).Run();
 
