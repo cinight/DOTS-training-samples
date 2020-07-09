@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 [GenerateAuthoringComponent]
-public struct DirectionData : IComponentData
+public struct BelongsToRunnerData : IComponentData
 {
-    public float3 Value;
+    public Entity entity;
 }

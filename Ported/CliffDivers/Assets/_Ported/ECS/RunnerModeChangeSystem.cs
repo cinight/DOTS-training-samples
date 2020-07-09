@@ -9,28 +9,40 @@ public class RunnerModeChangeSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        // Assign values to local variables captured in your job here, so that it has
-        // everything it needs to do its work when it runs later.
-        // For example,
-        //     float deltaTime = Time.DeltaTime;
+        float time = (float)Time.ElapsedTime;
+        Random _random = new Random((uint)(173859*time));
 
-        // This declares a new kind of job, which is a unit of work to do.
-        // The job is declared as an Entities.ForEach with the target components as parameters,
-        // meaning it will process all entities in the world that have both
-        // Translation and Rotation components. Change it to process the component
-        // types you want.
-        
-        
-        
-        Entities.ForEach((ref Translation translation, in Rotation rotation) => {
-            // Implement the work to perform for each entity here.
-            // You should only access data that is local or that is a
-            // field on this job. Note that the 'rotation' parameter is
-            // marked as 'in', which means it cannot be modified,
-            // but allows this job to run in parallel with other jobs
-            // that want to read Rotation component data.
-            // For example,
-            //     translation.Value += math.mul(rotation.Value, new float3(0, 0, 1)) * deltaTime;
-        }).Schedule();
+        float runDirSway = RunnerMoveSystem.runDirSway;
+
+        Entities.WithStructuralChanges().WithNone<IsFallingTag>()
+        .ForEach((Entity e, ref RunnerBarMoveData moveData, in Translation tran, in RunnerBarData barData, in RunnerConstantData constData ) => 
+        {
+            float distance = math.distance(tran.Value,0);
+            if (distance<PitGenerator.pitRadius+1.5f) 
+            {
+                EntityManager.AddComponent(e,typeof(IsFallingTag));
+                for (int i=0;i<moveData.barLengths.Length;i++) 
+                {
+                    var pos = (moveData.points[barData.bars[i * 2]] - moveData.points[barData.bars[i * 2 + 1]]);
+                    moveData.barLengths[i] = math.distance(pos,0);
+                }
+
+                // final frame of animated mode - prepare point velocities:
+                float3 runDir = -tran.Value;
+                runDir += math.cross(runDir,math.up())*runDirSway;
+                runDir = math.normalize(runDir);
+                for (int i=0;i<moveData.points.Length;i++) 
+                {
+                    moveData.prevPoints[i] = moveData.prevPoints[i]*.5f + (moveData.points[i] - runDir * RunnerManager.runSpeed * Time.fixedDeltaTime*(.5f+moveData.points[i].y*.5f / constData.shoulderHeight))*.5f;
+                    
+                    // jump
+                    if (i==0 || i > 4) {
+                        moveData.prevPoints[i] -= new float3(0f,_random.NextFloat(.05f,.15f),0f);
+                    }
+                }
+			}
+        }).Run();
     }
 }
+
+//NEED OPTIMIZATION

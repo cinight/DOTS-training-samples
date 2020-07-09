@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 [GenerateAuthoringComponent]
-public struct DirectionData : IComponentData
+public struct RunnerTimeData : IComponentData
 {
-    public float3 Value;
+    public float timeSinceSpawn;
 }
