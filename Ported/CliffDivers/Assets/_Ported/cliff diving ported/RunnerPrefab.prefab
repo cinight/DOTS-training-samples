@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8013488500626618024}
-  - component: {fileID: 4069413760777340758}
   - component: {fileID: 9170412393695303494}
   - component: {fileID: 4698631241308768703}
   - component: {fileID: -1393537378165690857}
@@ -17,6 +16,7 @@ GameObject:
   - component: {fileID: 1336970192768906472}
   - component: {fileID: -1052842938734422613}
   - component: {fileID: 3754756278268084103}
+  - component: {fileID: -1695284887842945143}
   m_Layer: 0
   m_Name: RunnerPrefab
   m_TagString: Untagged
@@ -38,22 +38,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4069413760777340758
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8013488500626618028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77f5a508b8c9bb54da505dca9fd5cd69, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Value:
-    x: 0
-    y: 0
-    z: 0
 --- !u!114 &9170412393695303494
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,3 +137,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entity: {fileID: 0}
+--- !u!114 &-1695284887842945143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8013488500626618028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc87771a276bfc24498a9a58decb2c65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Values: []
