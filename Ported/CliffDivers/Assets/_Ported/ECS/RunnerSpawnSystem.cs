@@ -37,9 +37,9 @@ public class RunnerSpawnSystem : SystemBase
             ref Translation tran, 
             ref RunnerColorData colData, 
             ref RunnerConstantData constData,
-            ref RunnerBarData barData,
-            ref RunnerBarMoveData barMoveData,
-            ref RunnerTimeData timeData
+            ref RunnerTimeData timeData,
+            ref DynamicBuffer<BufferBars> bufferBars,
+            ref DynamicBuffer<BufferBarThickness> bufferBarsThickness
         ) => 
         {
             //Init runner position
@@ -74,39 +74,23 @@ public class RunnerSpawnSystem : SystemBase
             colData.color = new float4(col.r,col.g,col.b,col.a);
 
             //Bar constant arrays
-			var bars = new int[] { 0,1,    //thigh 1
-							   1,2,    // shin 1
-							   0,3,    // thigh 2
-							   3,4,    // shin 2
-							   0,5,    // lower spine
-							   5,6,    // upper spine
-							   6,7,    // bicep 1
-							   7,8,    // forearm 1
-							   6,9,    // bicep 2
-							   9,10,   // forearm 2
-							   6,11};  // head
-			barData.bars = new NativeArray<int>();
-            barData.bars.CopyFrom(bars);
-            var barThicknesses = new float[bars.Length / 2];
-			for (int i = 0; i < barThicknesses.Length - 1; i++) 
+            bufferBars.Add(new BufferBars{bars = 0}); bufferBars.Add(new BufferBars{bars = 1});//thigh 1
+            bufferBars.Add(new BufferBars{bars = 1}); bufferBars.Add(new BufferBars{bars = 2});// shin 1
+            bufferBars.Add(new BufferBars{bars = 0}); bufferBars.Add(new BufferBars{bars = 3});// thigh 2
+            bufferBars.Add(new BufferBars{bars = 3}); bufferBars.Add(new BufferBars{bars = 4});// shin 2
+            bufferBars.Add(new BufferBars{bars = 0}); bufferBars.Add(new BufferBars{bars = 5});// lower spine
+            bufferBars.Add(new BufferBars{bars = 5}); bufferBars.Add(new BufferBars{bars = 6});// upper spine
+            bufferBars.Add(new BufferBars{bars = 6}); bufferBars.Add(new BufferBars{bars = 7});// bicep 1
+            bufferBars.Add(new BufferBars{bars = 7}); bufferBars.Add(new BufferBars{bars = 8});// forearm 1
+            bufferBars.Add(new BufferBars{bars = 6}); bufferBars.Add(new BufferBars{bars = 9});// bicep 2
+            bufferBars.Add(new BufferBars{bars = 9}); bufferBars.Add(new BufferBars{bars = 10});// forearm 2
+            bufferBars.Add(new BufferBars{bars = 6}); bufferBars.Add(new BufferBars{bars = 11});// head
+            int barThicknessesCount = bufferBars.Length / 2;
+			for (int i = 0; i < barThicknessesCount - 1; i++) 
             {
-				barThicknesses[i] = .2f;
+                bufferBarsThickness.Add(new BufferBarThickness{barThicknesses = .2f});
 			}
-			barThicknesses[barThicknesses.Length - 1] = .4f;
-            barData.barThicknesses.CopyFrom(barThicknesses);
-
-            //Bar movement arrays
-            barMoveData.points = new NativeArray<float3>(12,Allocator.Persistent);
-			barMoveData.prevPoints = new NativeArray<float3>(barMoveData.points.Length,Allocator.Persistent);
-			barMoveData.barLengths = new NativeArray<float>(bars.Length / 2,Allocator.Persistent);
-			barMoveData.footTargets = new NativeArray<float3>(2,Allocator.Persistent);
-			barMoveData.stepStartPositions = new NativeArray<float3>(2,Allocator.Persistent);
-			barMoveData.footAnimTimers = new NativeArray<float>(2,Allocator.Persistent);
-			barMoveData.feetAnimating = new NativeArray<bool>(2,Allocator.Persistent);
-            barMoveData.footAnimTimers[0] = _random.NextFloat(0f,1f);
-            barMoveData.footAnimTimers[1] = _random.NextFloat(0f,1f);
-            barMoveData.feetAnimating[0] = true;
-            barMoveData.feetAnimating[1] = true;
+			bufferBarsThickness[barThicknessesCount - 1] = new BufferBarThickness{barThicknesses = .4f};
 
             //Init constant data
             constData.hipHeight = 1.8f;
@@ -115,9 +99,41 @@ public class RunnerSpawnSystem : SystemBase
             constData.xzDamping = _random.NextFloat(0f,1f)*.02f+.002f;
             constData.spreadForce = _random.NextFloat(.0005f,.0015f);
             constData.stanceWidth = .35f;
-            constData.matricesPerRunner = bars.Length / 2;
+            constData.matricesPerRunner = bufferBars.Length / 2;
             constData.legLength = math.sqrt(constData.hipHeight * constData.hipHeight + constData.stanceWidth * constData.stanceWidth)*1.1f;
 
+        }).Run();
+
+        //Bar movement arrays
+        Entities.WithAll<NotInitialisedTag>()
+        .ForEach((
+            ref DynamicBuffer<BufferPoints> points,
+            ref DynamicBuffer<BufferPrevPoints> prevPoints,
+            ref DynamicBuffer<BufferBarLengths> barLengths,
+            ref DynamicBuffer<BufferFootTargets> footTargets,
+            ref DynamicBuffer<BufferStepStartPos> stepStartPos,
+            ref DynamicBuffer<BufferFootAnimTimers> footAnimTimers,
+            ref DynamicBuffer<BufferFeetAnimating> feetAnimating,
+            in DynamicBuffer<BufferBars> bufferBars
+        ) => 
+        {
+			for (int i = 0; i < 12; i++)                    points.Add(new BufferPoints{points = 0f});
+            for (int i = 0; i < points.Length; i++)         prevPoints.Add(new BufferPrevPoints{prevPoints = 0f});
+            for (int i = 0; i < bufferBars.Length / 2; i++) barLengths.Add(new BufferBarLengths{barLengths = 0f});
+            for (int i = 0; i < 2; i++)                     footTargets.Add(new BufferFootTargets{footTargets = 0f});
+            for (int i = 0; i < 2; i++)                     stepStartPos.Add(new BufferStepStartPos{stepStartPositions = 0f});
+            for (int i = 0; i < 2; i++)                     footAnimTimers.Add(new BufferFootAnimTimers{footAnimTimers = _random.NextFloat(0f,1f)});
+            for (int i = 0; i < 2; i++)                     feetAnimating.Add(new BufferFeetAnimating{feetAnimating = true});
+        }).Run();
+
+        //Spawn the bar cubes
+        Entities.WithAll<NotInitialisedTag>().WithStructuralChanges().ForEach((Entity e, ref DynamicBuffer<BufferBars> bufferBars) => 
+        {
+            var newBar = EntityManager.Instantiate(spawnData[spawnerEntity].barPrefab,bufferBars.Length,Allocator.Temp);
+            for(int i=0; i < newBar.Length; i++)
+            {
+                EntityManager.SetComponentData(newBar[i],new BelongsToRunnerData{entity = e});
+            }
         }).Run();
 
         //Set spawner settings

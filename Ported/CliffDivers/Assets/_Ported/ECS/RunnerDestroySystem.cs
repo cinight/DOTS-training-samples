@@ -10,11 +10,11 @@ public class RunnerDestroySystem : SystemBase
     protected override void OnUpdate()
     {      
         Entities.WithStructuralChanges().WithAll<IsFallingTag>().
-        ForEach((Entity e, in RunnerBarMoveData moveData) => 
+        ForEach((Entity e, in DynamicBuffer<BufferPoints> points) => 
         {
-            for (int i=0;i<moveData.points.Length;i++) 
+            for (int i=0;i<points.Length;i++) 
             {
-                if (moveData.points[i].y<-150f) 
+                if (points[i].points.y<-150f) 
                 {
                     EntityManager.DestroyEntity(e);
                 }

@@ -10,49 +10,55 @@ public class RunnerFallSystem : SystemBase
     protected override void OnUpdate()
     {
         Entities.WithAll<IsFallingTag>().
-        ForEach((ref RunnerBarMoveData moveData, in RunnerConstantData constData, in RunnerBarData barData) => 
+        ForEach((
+			ref DynamicBuffer<BufferPoints> points,
+			ref DynamicBuffer<BufferPrevPoints> prevPoints,
+			in RunnerConstantData constData, 
+			in DynamicBuffer<BufferBars> bufferBars,
+			in DynamicBuffer<BufferBarLengths> barLengths
+			) => 
         {
 			float averageX=0f;
 			float averageY=0f;
 			float averageZ=0f;
-			for (int i=0;i<moveData.points.Length;i++) 
+			for (int i=0;i<points.Length;i++) 
 			{
-				averageX += moveData.points[i].x;
-				averageY += moveData.points[i].y;
-				averageZ += moveData.points[i].z;
+				averageX += points[i].points.x;
+				averageY += points[i].points.y;
+				averageZ += points[i].points.z;
 			}
-			float3 averagePos = new float3(averageX / moveData.points.Length,averageY / moveData.points.Length,averageZ / moveData.points.Length);
+			float3 averagePos = new float3(averageX / points.Length,averageY / points.Length,averageZ / points.Length);
 
-			for (int i=0;i<moveData.points.Length;i++) 
+			for (int i=0;i<points.Length;i++) 
 			{
-				float3 startPos = moveData.points[i];
-                var prevPoint = moveData.prevPoints[i];
-                var point = moveData.points[i];
+				float3 startPos = points[i].points;
+                var prevPoint = prevPoints[i].prevPoints;
+                var point = points[i].points;
 
 				prevPoint.y += .005f;
 
-				prevPoint.x-=(moveData.points[i].x - averagePos.x) * constData.spreadForce;
-				prevPoint.y-=(moveData.points[i].y - averagePos.y) * constData.spreadForce;
-				prevPoint.z-=(moveData.points[i].z - averagePos.z) * constData.spreadForce;
+				prevPoint.x-=(points[i].points.x - averagePos.x) * constData.spreadForce;
+				prevPoint.y-=(points[i].points.y - averagePos.y) * constData.spreadForce;
+				prevPoint.z-=(points[i].points.z - averagePos.z) * constData.spreadForce;
 
-				point.x += (moveData.points[i].x - moveData.prevPoints[i].x)*(1f-constData.xzDamping);
-				point.y += moveData.points[i].y - moveData.prevPoints[i].y;
-				point.z += (moveData.points[i].z - moveData.prevPoints[i].z)*(1f-constData.xzDamping);
+				point.x += (points[i].points.x - prevPoints[i].prevPoints.x)*(1f-constData.xzDamping);
+				point.y += points[i].points.y - prevPoints[i].prevPoints.y;
+				point.z += (points[i].points.z - prevPoints[i].prevPoints.z)*(1f-constData.xzDamping);
 				prevPoint = startPos;
 
-                moveData.prevPoints[i] = prevPoint;
-                moveData.points[i] = point;
+				prevPoints[i] = new BufferPrevPoints{prevPoints = prevPoint};
+				points[i] = new BufferPoints{points = point};
 			}
 
-			for (int i=0;i<barData.bars.Length/2;i++) 
+			for (int i=0;i<bufferBars.Length/2;i++) 
 			{
-				float3 point1 = moveData.points[barData.bars[i * 2]];
-				float3 point2 = moveData.points[barData.bars[i * 2 + 1]];
+				float3 point1 = points[bufferBars[i * 2].bars].points;
+				float3 point2 = points[bufferBars[i * 2 + 1].bars].points;
 				float dx = point1.x - point2.x;
 				float dy = point1.y - point2.y;
 				float dz = point1.z - point2.z;
 				float dist = math.sqrt(dx * dx + dy * dy + dz * dz);
-				float pushDist = (dist - moveData.barLengths[i])*.5f/dist;
+				float pushDist = (dist - barLengths[i].barLengths)*.5f/dist;
 				point1.x -= dx * pushDist;
 				point1.y -= dy * pushDist;
 				point1.z -= dz * pushDist;
@@ -60,8 +66,8 @@ public class RunnerFallSystem : SystemBase
 				point2.y += dy * pushDist;
 				point2.z += dz * pushDist;
 
-				moveData.points[barData.bars[i * 2]] = point1;
-				moveData.points[barData.bars[i * 2 + 1]] = point2;
+				points[bufferBars[i * 2].bars] = new BufferPoints{points = point1};
+				points[bufferBars[i * 2 + 1].bars] = new BufferPoints{points = point2};
 			}
         }).Schedule();
     }

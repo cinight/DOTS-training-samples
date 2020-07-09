@@ -77,10 +77,10 @@ public class RunnerMoveSystem : SystemBase
     // }
 
 
-	void UpdateLimb( ref NativeArray<float3> points, int index1, int index2, int jointIndex, float length, float3 perp)
+	void UpdateLimb( ref DynamicBuffer<BufferPoints> points, int index1, int index2, int jointIndex, float length, float3 perp)
 	{
-		float3 point1 = points[index1];
-		float3 point2 = points[index2];
+		float3 point1 = points[index1].points;
+		float3 point2 = points[index2].points;
 		float dx = point2.x - point1.x;
 		float dy = point2.y - point1.y;
 		float dz = point2.z - point1.z;
@@ -91,12 +91,17 @@ public class RunnerMoveSystem : SystemBase
 			// requested limb is too long: clamp it
 
 			length /= dist;
-			points[index2] = new float3(point1.x + dx * length,
+
+            points[index2] = new BufferPoints{points = 
+                new float3(point1.x + dx * length,
 										 point1.y + dy * length,
-										 point1.z + dz * length);
-			points[jointIndex] = new float3(point1.x + dx * length*.5f,
+										 point1.z + dz * length)
+            };
+            points[jointIndex] = new BufferPoints{points = 
+                new float3(point1.x + dx * length*.5f,
 											 point1.y + dy * length*.5f,
-											 point1.z + dz * length*.5f);
+											 point1.z + dz * length*.5f)
+            };
 		}
 		else
 		{
@@ -110,9 +115,11 @@ public class RunnerMoveSystem : SystemBase
 			// cross product of (dx,dy,dz) and (perp)
 			float3 bend = new float3(dy * perp.z - dz * perp.y,dz * perp.x - dx * perp.z,dx * perp.y - dy * perp.x);
 
-			points[jointIndex] = new float3((point1.x + point2.x) * .5f+bend.x,
-											 (point1.y + point2.y) * .5f+bend.y,
-											 (point1.z + point2.z) * .5f+bend.z);
+            points[jointIndex] = new BufferPoints{points = 
+                new float3((point1.x + point2.x) * .5f+bend.x,
+				(point1.y + point2.y) * .5f+bend.y,
+				(point1.z + point2.z) * .5f+bend.z)
+            };
 		}
         //return points;
 	}
@@ -125,20 +132,36 @@ public class RunnerMoveSystem : SystemBase
         //For jobs
         //var moveDataType = GetComponentTypeHandle<RunnerBarMoveData>();
 
+        //Save PrevPoints
+        Entities.WithoutBurst().ForEach((
+            ref DynamicBuffer<BufferPrevPoints> prevPoints,
+            in DynamicBuffer<BufferPoints> points
+        ) => 
+        {
+			for (int i = 0; i < points.Length; i++) 
+			{
+				prevPoints[i] = new BufferPrevPoints{prevPoints = points[i].points};
+			}
+
+        }).Schedule();
+
         //Update body part
         float deltatime = Time.DeltaTime;
         float fixedDeltaTime = UnityEngine.Time.fixedDeltaTime;
-        Entities.WithoutBurst().ForEach((ref RunnerBarMoveData moveData, ref RunnerTimeData timeData, ref Translation tran, in RunnerConstantData constData) => 
+        Entities.WithoutBurst().ForEach((
+            ref DynamicBuffer<BufferPoints> points,
+            ref DynamicBuffer<BufferFootTargets> footTargets,
+            ref DynamicBuffer<BufferFootAnimTimers> footAnimTimers,
+            ref DynamicBuffer<BufferFeetAnimating> feetAnimating,
+            ref DynamicBuffer<BufferStepStartPos> stepStartPos,
+            ref RunnerTimeData timeData,
+            ref Translation tran,
+            in RunnerConstantData constData
+        ) => 
         {
             //Time
             timeData.timeSinceSpawn += deltatime;
             timeData.timeSinceSpawn = math.saturate(timeData.timeSinceSpawn);
-
-            //Prev points
-			for (int i = 0; i < moveData.points.Length; i++) 
-			{
-				moveData.prevPoints[i] = moveData.points[i];
-			}
 
             float runSpeed = 10f;
 
@@ -149,42 +172,43 @@ public class RunnerMoveSystem : SystemBase
 			float3 perp = new float3(-runDir.z,0f,runDir.x);
 
 			// hip
-			moveData.points[0] = new float3(tran.Value.x, tran.Value.y + constData.hipHeight, tran.Value.z);
+            points[0] = new BufferPoints{points = new float3(tran.Value.x, tran.Value.y + constData.hipHeight, tran.Value.z)};
 
 			// feet
 			float3 stanceOffset = new float3(perp.x * constData.stanceWidth,perp.y * constData.stanceWidth,perp.z * constData.stanceWidth);
-			moveData.footTargets[0] = tran.Value - stanceOffset + runDir * (runSpeed * .1f);
-			moveData.footTargets[1] = tran.Value + stanceOffset + runDir * (runSpeed * .1f);
-			for (int i = 0; i < 2; i++) {
+			footTargets[0] = new BufferFootTargets{footTargets = tran.Value - stanceOffset + runDir * (runSpeed * .1f)};
+            footTargets[1] = new BufferFootTargets{footTargets = tran.Value + stanceOffset + runDir * (runSpeed * .1f)};
+			for (int i = 0; i < 2; i++) 
+            {
 				int pointIndex = 2 + i * 2;
-				float3 delta = moveData.footTargets[i] - moveData.points[pointIndex];
+				float3 delta = footTargets[i].footTargets - points[pointIndex].points;
                 float sqrMagnitude = math.distancesq(delta,0);
 				if (sqrMagnitude > .25f) {
-					if (moveData.feetAnimating[i] == false && (moveData.feetAnimating[1 - i] == false || moveData.footAnimTimers[1 - i] > .9f)) 
+					if (feetAnimating[i].feetAnimating == false && (feetAnimating[1 - i].feetAnimating == false || footAnimTimers[1 - i].footAnimTimers > .9f)) 
 					{
-						moveData.feetAnimating[i] = true;
-						moveData.footAnimTimers[i] = 0f;
-						moveData.stepStartPositions[i] = moveData.points[pointIndex];
+                        feetAnimating[i] = new BufferFeetAnimating{feetAnimating = true};
+                        footAnimTimers[i] = new BufferFootAnimTimers{footAnimTimers = 0f};
+                        stepStartPos[i] = new BufferStepStartPos{stepStartPositions = points[pointIndex].points};
 					}
 				}
 
-				if (moveData.feetAnimating[i]) 
+				if (feetAnimating[i].feetAnimating) 
 				{
-					moveData.footAnimTimers[i] = math.saturate(moveData.footAnimTimers[i] + fixedDeltaTime / constData.stepDuration);
-					float timer = moveData.footAnimTimers[i];
-					moveData.points[pointIndex] = math.lerp(moveData.stepStartPositions[i],moveData.footTargets[i],timer);
+                    footAnimTimers[i] = new BufferFootAnimTimers{footAnimTimers = math.saturate(footAnimTimers[i].footAnimTimers + fixedDeltaTime / constData.stepDuration)};
+					float timer = footAnimTimers[i].footAnimTimers;
+                    points[pointIndex] = new BufferPoints{points = math.lerp(stepStartPos[i].stepStartPositions,footTargets[i].footTargets,timer)};
 					float step = 1f - 4f * (timer - .5f) * (timer - .5f);
-					moveData.points[pointIndex] += new float3(0,step,0);
-					if (moveData.footAnimTimers[i] >= 1f) 
+                    points[pointIndex] = new BufferPoints{points = points[pointIndex].points + new float3(0,step,0)};
+					if (footAnimTimers[i].footAnimTimers >= 1f) 
                     {
-						moveData.feetAnimating[i] = false;
+						feetAnimating[i] = new BufferFeetAnimating{feetAnimating = false};
 					}
 				}
 			}
 
 			// knees
-			UpdateLimb(ref moveData.points,0,2,1,constData.legLength,perp);
-			UpdateLimb(ref moveData.points,0,4,3,constData.legLength,perp);
+			UpdateLimb(ref points,0,2,1,constData.legLength,perp);
+			UpdateLimb(ref points,0,4,3,constData.legLength,perp);
 
             //Job for knees
             // var job = new UpdateLimbJob()
@@ -209,12 +233,14 @@ public class RunnerMoveSystem : SystemBase
             // Dependency = job.Schedule(m_Group, Dependency);
 
 			// shoulders
-			moveData.points[6] = new float3(tran.Value.x + runDir.x * runSpeed * .075f,
+            points[6] = new BufferPoints{points = 
+            new float3(tran.Value.x + runDir.x * runSpeed * .075f,
 									tran.Value.y + constData.shoulderHeight,
-									tran.Value.z + runDir.z * runSpeed * .075f);
+									tran.Value.z + runDir.z * runSpeed * .075f)
+            };
 
 			// spine
-			UpdateLimb(ref moveData.points,0,6,5,constData.shoulderHeight - constData.hipHeight,perp);
+			UpdateLimb(ref points,0,6,5,constData.shoulderHeight - constData.hipHeight,perp);
 
             //Job for spine
             // job = new UpdateLimbJob()
@@ -231,12 +257,15 @@ public class RunnerMoveSystem : SystemBase
 			// hands
 			for (int i = 0; i < 2; i++) 
 			{
-				float3 oppositeFootOffset = moveData.points[4 - 2 * i] - moveData.points[0];
+				float3 oppositeFootOffset = points[4 - 2 * i].points - points[0].points;
 				oppositeFootOffset.y = oppositeFootOffset.y*(-.5f)-1.7f;
-				moveData.points[8 + i * 2] = moveData.points[0] - oppositeFootOffset*.65f - perp*(.8f*(-1f+i*2f)) + runDir*(runSpeed*.05f);
+                points[8 + i * 2] = new BufferPoints{points = 
+                points[0].points - oppositeFootOffset*.65f - perp*(.8f*(-1f+i*2f)) + runDir*(runSpeed*.05f)
+                };
+
 
 				// elbows
-				UpdateLimb(ref moveData.points,6,8 + i * 2,7 + i * 2,constData.legLength*.9f,new float3(0f,-1f+i*2f,0f));
+				UpdateLimb(ref points,6,8 + i * 2,7 + i * 2,constData.legLength*.9f,new float3(0f,-1f+i*2f,0f));
 
                 //Job for elbows
                 // job = new UpdateLimbJob()
@@ -252,7 +281,9 @@ public class RunnerMoveSystem : SystemBase
 			}
 
 			// head
-			moveData.points[11] = moveData.points[6] + math.normalize(tran.Value) * -.1f+new float3(0f,.4f,0f);
+            points[11] = new BufferPoints{points = 
+            points[6].points + math.normalize(tran.Value) * -.1f+new float3(0f,.4f,0f)
+            };
 
         }).Run();
     }

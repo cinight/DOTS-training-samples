@@ -277,6 +277,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   runnerPrefab: {fileID: 8013488500626618028, guid: 38345493d6161024f9458e3f2a3f8f79,
     type: 3}
-  bodyPartPrefab: {fileID: 6111104544641377927, guid: bd1cd04b8eac66641a032abeea715187,
+  barPrefab: {fileID: 6111104544641377927, guid: bd1cd04b8eac66641a032abeea715187,
     type: 3}
   distanceFromPit: 40
