@@ -5,6 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateAfter(typeof(RunnerFallSystem))]
 public class RunnerDestroySystem : SystemBase
 {
     protected override void OnUpdate()

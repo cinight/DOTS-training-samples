@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 
+[UpdateAfter(typeof(RunnerDestroySystem))]
 public class BodyPartRenderSystem : SystemBase
 {
     protected override void OnUpdate()

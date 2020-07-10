@@ -5,6 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateAfter(typeof(RunnerMoveSystem))]
 public class RunnerModeChangeSystem : SystemBase
 {
     EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;

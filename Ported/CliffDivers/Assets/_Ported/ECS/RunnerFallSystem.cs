@@ -5,6 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateAfter(typeof(RunnerModeChangeSystem))]
 public class RunnerFallSystem : SystemBase
 {
     protected override void OnUpdate()

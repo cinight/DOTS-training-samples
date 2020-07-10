@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 
+[UpdateAfter(typeof(PitGeneratonSystem))]
 public class RunnerSpawnSystem : SystemBase
 {
     Entity spawnerEntity;
@@ -167,5 +168,8 @@ public class RunnerSpawnSystem : SystemBase
 
         //Remove initialize tag
         EntityManager.RemoveComponent(newEntities,typeof(NotInitialisedTag));
+
+        //Just for debug
+        this.Enabled = false;
     }
 }
