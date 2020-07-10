@@ -27,7 +27,15 @@ public class BodyPartRenderSystem : SystemBase
         float t = (UnityEngine.Time.time - UnityEngine.Time.fixedTime) / Time.fixedDeltaTime;
         
         //Update runner bars
-        Entities.ForEach
+        Entities.
+        WithReadOnly(constantDataType).
+        WithReadOnly(runnerColorType).
+        WithReadOnly(runnerTimeType).
+        WithReadOnly(bufferBars).
+        WithReadOnly(bufferBarThickness).
+        WithReadOnly(bufferPoints).
+        WithReadOnly(bufferPrevPoints).
+        ForEach
         ((
             ref NonUniformScale sca, 
             ref Translation tran, 
@@ -68,7 +76,7 @@ public class BodyPartRenderSystem : SystemBase
             sca.Value = scale;
             matCol.Value = colorData.color;
 
-        }).Run();
+        }).ScheduleParallel();
     }
 }
 
