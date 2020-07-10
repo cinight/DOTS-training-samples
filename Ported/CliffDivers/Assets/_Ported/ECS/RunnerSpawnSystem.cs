@@ -10,7 +10,6 @@ using Unity.Transforms;
 public class RunnerSpawnSystem : SystemBase
 {
     Entity spawnerEntity;
-    //Entity runnerPrefab;
     Entity barPrefab;
     NativeArray<Entity> newEntities;
     NativeArray<Entity> newBars;
@@ -25,23 +24,6 @@ public class RunnerSpawnSystem : SystemBase
             newEntities = EntityManager.Instantiate(runnerSpawnData.runnerPrefab,2,Allocator.Temp);
 
         }).Run();
-       
-        for(int i=0; i < newEntities.Length; i++)
-        {
-            //FOR DEBUGGING
-            EntityManager.SetName(newEntities[i],"Runner");
-
-            //Adding all the buggers
-            EntityManager.AddBuffer<BufferBars>(newEntities[i]);
-            EntityManager.AddBuffer<BufferBarLengths>(newEntities[i]);
-            EntityManager.AddBuffer<BufferBarThickness>(newEntities[i]);
-            EntityManager.AddBuffer<BufferFeetAnimating>(newEntities[i]);
-            EntityManager.AddBuffer<BufferFootAnimTimers>(newEntities[i]);
-            EntityManager.AddBuffer<BufferFootTargets>(newEntities[i]);
-            EntityManager.AddBuffer<BufferPoints>(newEntities[i]);
-            EntityManager.AddBuffer<BufferPrevPoints>(newEntities[i]);
-            EntityManager.AddBuffer<BufferStepStartPos>(newEntities[i]);
-        }
 
         //Get spawner settings
         var spacingData = GetComponentDataFromEntity<RunnerSpawnerSpacingData>(false);
@@ -51,6 +33,24 @@ public class RunnerSpawnSystem : SystemBase
         float spawnAngle = spacingData[spawnerEntity].spawnAngle;
         float pitRadius = pitRadiusData[spawnerEntity].Value;
         float distanceFromPit = spawnData[spawnerEntity].distanceFromPit;
+
+        //Adding all the buggers
+        Entities.WithStructuralChanges().ForEach((Entity e) => 
+        {
+            EntityManager.AddBuffer<BufferBars>(e);
+            EntityManager.AddBuffer<BufferBarLengths>(e);
+            EntityManager.AddBuffer<BufferBarThickness>(e);
+            EntityManager.AddBuffer<BufferFeetAnimating>(e);
+            EntityManager.AddBuffer<BufferFootAnimTimers>(e);
+            EntityManager.AddBuffer<BufferFootTargets>(e);
+            EntityManager.AddBuffer<BufferPoints>(e);
+            EntityManager.AddBuffer<BufferPrevPoints>(e);
+            EntityManager.AddBuffer<BufferStepStartPos>(e);
+
+            //FOR DEBUGGING
+            EntityManager.SetName(e,"Runner");
+
+        }).Run();
 
         //Init runner
         float time = (float)Time.ElapsedTime;
@@ -151,24 +151,35 @@ public class RunnerSpawnSystem : SystemBase
 
         //Spawn the bar cubes
         var bufferBarsLength = 11;
-        for(int i=0; i < newEntities.Length; i++)
+        Entities.WithStructuralChanges().WithAll<NotInitialisedTag>().ForEach((Entity e) => 
         {
             newBars = EntityManager.Instantiate(barPrefab,bufferBarsLength,Allocator.Temp);
             for(int k=0; k < newBars.Length; k++)
             {
-                EntityManager.AddComponentData(newBars[k],new BelongsToRunnerData{entity = newEntities[i]});
+                EntityManager.AddComponentData(newBars[k],new BelongsToRunnerData{entity = e});
                 EntityManager.AddComponentData(newBars[k],new BelongsToBarData{barID = k});
 
                 //FOR DEBUGGING
                 EntityManager.SetName(newBars[k],"Runner Bar");
             }
-        }
+            
+        }).Run();
 
         //Set spawner settings
-        EntityManager.SetComponentData(spawnerEntity,new RunnerSpawnerSpacingData{ spawnAngle = spawnAngle , Value = spacing });
+        Entities.ForEach((ref RunnerSpawnerSpacingData runnerSpawnerSpacingData) => 
+        {
+            runnerSpawnerSpacingData.spawnAngle = spawnAngle;
+            runnerSpawnerSpacingData.Value = spacing;
+
+        }).Run();
 
         //Remove initialize tag
-        EntityManager.RemoveComponent(newEntities,typeof(NotInitialisedTag));
+        Entities.WithStructuralChanges().WithAll<NotInitialisedTag>().ForEach((Entity e) => 
+        {
+            EntityManager.RemoveComponent(e,typeof(NotInitialisedTag));
+            
+        }).Run();
+        
 
         //Just for debug
         //this.Enabled = false;
