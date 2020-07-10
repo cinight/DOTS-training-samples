@@ -23,22 +23,16 @@ public class RunnerDestroySystem : SystemBase
 
         //Destroy runner entity
         Entities.WithAll<IsFallingTag>().
-        ForEach((Entity e, in Translation tran) => 
+        ForEach((Entity e, in Translation tran, in DynamicBuffer<BufferBarEntities> barEntities) => 
         {
             if (tran.Value.y<-150f) 
             {
-                ecb.DestroyEntity(e);
-                //EntityManager.DestroyEntity(e);
-            }
-        }).Schedule();
+                //Destroy bar entities
+                for(int i = 0; i< barEntities.Length; i++)
+                {
+                    ecb.DestroyEntity(barEntities[i].entity);
+                }
 
-        //Destroy bar entity
-        Entities.
-        WithAll<BelongsToRunnerData>().
-        ForEach((Entity e, in Translation tran) => 
-        {
-            if (tran.Value.y<-150f) 
-            {
                 ecb.DestroyEntity(e);
                 //EntityManager.DestroyEntity(e);
             }
