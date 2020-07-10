@@ -7,16 +7,28 @@ using Unity.Transforms;
 
 public class RunnerModeChangeSystem : SystemBase
 {
+    EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+        // Find the ECB system once and store it for later usage
+        m_EndSimulationEcbSystem = World
+            .GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+    }
+
     protected override void OnUpdate()
     {
+        var ecb = m_EndSimulationEcbSystem.CreateCommandBuffer();
+
+        //time
         float time = (float)Time.ElapsedTime;
         Random _random = new Random((uint)(173859*time));
 
         float runDirSway = RunnerMoveSystem.runDirSway;
 
-        Entities.WithStructuralChanges().WithNone<IsFallingTag>()
+        Entities.WithoutBurst().WithNone<IsFallingTag>()
         .ForEach((
-            Entity e, 
+            Entity e, int entityInQueryIndex,
             ref DynamicBuffer<BufferBarLengths> barLengths,
             ref DynamicBuffer<BufferPrevPoints> prevPoints,
             in DynamicBuffer<BufferPoints> points,
@@ -28,7 +40,8 @@ public class RunnerModeChangeSystem : SystemBase
             float distance = math.distance(tran.Value,0);
             if (distance<PitGenerator.pitRadius+1.5f) 
             {
-                EntityManager.AddComponent(e,typeof(IsFallingTag));
+                ecb.AddComponent(e,typeof(IsFallingTag));
+
                 for (int i=0;i<barLengths.Length;i++) 
                 {
                     var pos = (points[bufferBars[i * 2].bars].points - points[bufferBars[i * 2 + 1].bars].points);
@@ -53,6 +66,9 @@ public class RunnerModeChangeSystem : SystemBase
                 }
 			}
         }).Run();
+
+        // Make sure that the ECB system knows about our job
+        m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
     }
 }
 

@@ -9,7 +9,10 @@ using Unity.Transforms;
 public class RunnerSpawnSystem : SystemBase
 {
     Entity spawnerEntity;
+    //Entity runnerPrefab;
+    Entity barPrefab;
     NativeArray<Entity> newEntities;
+    NativeArray<Entity> newBars;
 
     protected override void OnUpdate()
     {
@@ -17,14 +20,27 @@ public class RunnerSpawnSystem : SystemBase
         Entities.WithStructuralChanges().ForEach((Entity e, in RunnerSpawnData runnerSpawnData) => 
         {
             spawnerEntity = e;
+            barPrefab = runnerSpawnData.barPrefab;
             newEntities = EntityManager.Instantiate(runnerSpawnData.runnerPrefab,2,Allocator.Temp);
 
-            //FOR DEBUGGING
-            for(int i=0; i < newEntities.Length; i++)
-            {
-                EntityManager.SetName(newEntities[i],"Runner");
-            }
         }).Run();
+       
+        for(int i=0; i < newEntities.Length; i++)
+        {
+            //FOR DEBUGGING
+            EntityManager.SetName(newEntities[i],"Runner");
+
+            //Adding all the buggers
+            EntityManager.AddBuffer<BufferBars>(newEntities[i]);
+            EntityManager.AddBuffer<BufferBarLengths>(newEntities[i]);
+            EntityManager.AddBuffer<BufferBarThickness>(newEntities[i]);
+            EntityManager.AddBuffer<BufferFeetAnimating>(newEntities[i]);
+            EntityManager.AddBuffer<BufferFootAnimTimers>(newEntities[i]);
+            EntityManager.AddBuffer<BufferFootTargets>(newEntities[i]);
+            EntityManager.AddBuffer<BufferPoints>(newEntities[i]);
+            EntityManager.AddBuffer<BufferPrevPoints>(newEntities[i]);
+            EntityManager.AddBuffer<BufferStepStartPos>(newEntities[i]);
+        }
 
         //Get spawner settings
         var spacingData = GetComponentDataFromEntity<RunnerSpawnerSpacingData>(false);
@@ -92,7 +108,7 @@ public class RunnerSpawnSystem : SystemBase
             bufferBars.Add(new BufferBars{bars = 9}); bufferBars.Add(new BufferBars{bars = 10});// forearm 2
             bufferBars.Add(new BufferBars{bars = 6}); bufferBars.Add(new BufferBars{bars = 11});// head
             int barThicknessesCount = bufferBars.Length / 2;
-			for (int i = 0; i < barThicknessesCount - 1; i++) 
+			for (int i = 0; i < barThicknessesCount; i++) 
             {
                 bufferBarsThickness.Add(new BufferBarThickness{barThicknesses = .2f});
 			}
@@ -133,17 +149,18 @@ public class RunnerSpawnSystem : SystemBase
         }).Run();
 
         //Spawn the bar cubes
-        Entities.WithAll<NotInitialisedTag>().WithStructuralChanges().ForEach((Entity e, ref DynamicBuffer<BufferBars> bufferBars) => 
+        var bufferBarsLength = 12;
+        for(int i=0; i < newEntities.Length; i++)
         {
-            var newBar = EntityManager.Instantiate(spawnData[spawnerEntity].barPrefab,bufferBars.Length,Allocator.Temp);
-            for(int i=0; i < newBar.Length; i++)
+            newBars = EntityManager.Instantiate(barPrefab,bufferBarsLength,Allocator.Temp);
+            for(int k=0; k < newBars.Length; k++)
             {
-                EntityManager.SetComponentData(newBar[i],new BelongsToRunnerData{entity = e});
+                EntityManager.AddComponentData(newBars[k],new BelongsToRunnerData{entity = newEntities[i]});
 
                 //FOR DEBUGGING
-                EntityManager.SetName(newBar[i],"Runner Bar");
+                EntityManager.SetName(newBars[k],"Runner Bar");
             }
-        }).Run();
+        }
 
         //Set spawner settings
         EntityManager.SetComponentData(spawnerEntity,new RunnerSpawnerSpacingData{ spawnAngle = spawnAngle , Value = spacing });
