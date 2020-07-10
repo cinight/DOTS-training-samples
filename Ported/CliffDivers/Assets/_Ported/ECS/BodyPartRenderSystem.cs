@@ -20,7 +20,14 @@ public class BodyPartRenderSystem : SystemBase
         float t = (UnityEngine.Time.time - UnityEngine.Time.fixedTime) / Time.fixedDeltaTime;
         
         //Update runner bars
-        Entities.WithoutBurst().ForEach((ref NonUniformScale sca, ref Translation tran, ref Rotation rot, ref MaterialColor matCol, in BelongsToRunnerData runnerEntityData) => 
+        Entities.WithoutBurst().ForEach
+        ((
+            ref NonUniformScale sca, 
+            ref Translation tran, 
+            ref Rotation rot, 
+            ref MaterialColor matCol, 
+            in BelongsToRunnerData runnerEntityData
+        ) => 
         {
             var barData = EntityManager.GetBuffer <BufferBars> ( runnerEntityData.entity ) ;
             var barThicknessData = EntityManager.GetBuffer <BufferBarThickness> ( runnerEntityData.entity ) ;
@@ -44,11 +51,12 @@ public class BodyPartRenderSystem : SystemBase
 
 				float3 delta = point2 - point1;
 				float3 position = (point1 + point2) * .5f;
-				quaternion rotation = quaternion.LookRotation(delta,math.up());
+				quaternion rotation = quaternion.LookRotation(delta+0.001f,math.up());
 				float3 scale = new float3(barThicknessData[j].barThicknesses*timeData.timeSinceSpawn,
 											barThicknessData[j].barThicknesses*timeData.timeSinceSpawn,
 											math.sqrt(delta.x*delta.x+delta.y*delta.y+delta.z*delta.z)*timeData.timeSinceSpawn);
-				//int index = i * constData.matricesPerRunner + j;
+				
+                //int index = i * constData.matricesPerRunner + j;
 				//matrices[index/instancesPerBatch][index%instancesPerBatch] = Matrix4x4.TRS(position,rotation,scale);
                 tran.Value = position;
                 rot.Value = rotation;

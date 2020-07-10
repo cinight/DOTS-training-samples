@@ -9,8 +9,8 @@ public class RunnerFallSystem : SystemBase
 {
     protected override void OnUpdate()
     {
-        Entities.WithAll<IsFallingTag>().
-        ForEach((
+        Entities.WithAll<IsFallingTag>().ForEach
+		((
 			ref DynamicBuffer<BufferPoints> points,
 			ref DynamicBuffer<BufferPrevPoints> prevPoints,
 			in RunnerConstantData constData, 

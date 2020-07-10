@@ -133,7 +133,7 @@ public class RunnerMoveSystem : SystemBase
         //var moveDataType = GetComponentTypeHandle<RunnerBarMoveData>();
 
         //Save PrevPoints
-        Entities.WithoutBurst().ForEach((
+        Entities.WithoutBurst().WithNone<IsFallingTag>().ForEach((
             ref DynamicBuffer<BufferPrevPoints> prevPoints,
             in DynamicBuffer<BufferPoints> points
         ) => 
@@ -148,7 +148,7 @@ public class RunnerMoveSystem : SystemBase
         //Update body part
         float deltatime = Time.DeltaTime;
         float fixedDeltaTime = UnityEngine.Time.fixedDeltaTime;
-        Entities.WithoutBurst().ForEach((
+        Entities.WithoutBurst().WithNone<IsFallingTag>().ForEach((
             ref DynamicBuffer<BufferPoints> points,
             ref DynamicBuffer<BufferFootTargets> footTargets,
             ref DynamicBuffer<BufferFootAnimTimers> footAnimTimers,
