@@ -16,12 +16,18 @@ public class BodyPartRenderSystem : SystemBase
         var runnerColorType = GetComponentDataFromEntity<RunnerColorData>(true);
         var runnerTimeType = GetComponentDataFromEntity<RunnerTimeData>(true);
 
+        //Get buffers
+        var bufferBars = GetBufferFromEntity<BufferBars>(true);
+        var bufferBarThickness = GetBufferFromEntity<BufferBarThickness>(true);
+        var bufferPoints = GetBufferFromEntity<BufferPoints>(true);
+        var bufferPrevPoints = GetBufferFromEntity<BufferPrevPoints>(true);
+
         //Factors
         //int instancesPerBatch = 1023;
         float t = (UnityEngine.Time.time - UnityEngine.Time.fixedTime) / Time.fixedDeltaTime;
         
         //Update runner bars
-        Entities.WithoutBurst().ForEach
+        Entities.ForEach
         ((
             ref NonUniformScale sca, 
             ref Translation tran, 
@@ -31,13 +37,14 @@ public class BodyPartRenderSystem : SystemBase
             in BelongsToBarData barIdData
         ) => 
         {
-            var barData = EntityManager.GetBuffer <BufferBars> ( runnerEntityData.entity ) ;
-            var barThicknessData = EntityManager.GetBuffer <BufferBarThickness> ( runnerEntityData.entity ) ;
-            var points = EntityManager.GetBuffer <BufferPoints> ( runnerEntityData.entity ) ;
-            var prevPoints = EntityManager.GetBuffer <BufferPrevPoints> ( runnerEntityData.entity ) ;
-            var colorData = runnerColorType[runnerEntityData.entity];
+            var barData = bufferBars[runnerEntityData.entity];
+            var barThicknessData = bufferBarThickness[runnerEntityData.entity];
+            var points = bufferPoints[runnerEntityData.entity];
+            var prevPoints = bufferPrevPoints[runnerEntityData.entity];
+            
             var constData = constantDataType[runnerEntityData.entity];
             var timeData = runnerTimeType[runnerEntityData.entity];
+            var colorData = runnerColorType[runnerEntityData.entity];
 
             int j = barIdData.barID;
 
