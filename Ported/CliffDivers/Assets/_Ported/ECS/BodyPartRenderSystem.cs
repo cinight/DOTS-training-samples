@@ -27,7 +27,8 @@ public class BodyPartRenderSystem : SystemBase
             ref Translation tran, 
             ref Rotation rot, 
             ref MaterialColor matCol, 
-            in BelongsToRunnerData runnerEntityData
+            in BelongsToRunnerData runnerEntityData,
+            in BelongsToBarData barIdData
         ) => 
         {
             var barData = EntityManager.GetBuffer <BufferBars> ( runnerEntityData.entity ) ;
@@ -38,33 +39,28 @@ public class BodyPartRenderSystem : SystemBase
             var constData = constantDataType[runnerEntityData.entity];
             var timeData = runnerTimeType[runnerEntityData.entity];
 
-            //int i = for each runner
+            int j = barIdData.barID;
 
-			for (int j = 0; j < barData.Length/2; j++) 
-			{
-				float3 point1 = points[barData[j*2].bars].points;
-				float3 point2 = points[barData[j*2 + 1].bars].points;
-				float3 oldPoint1 = prevPoints[barData[j * 2].bars].prevPoints;
-				float3 oldPoint2 = prevPoints[barData[j*2 + 1].bars].prevPoints;
+            float3 point1 = points[barData[j*2].bars].points;
+            float3 point2 = points[barData[j*2 + 1].bars].points;
+            float3 oldPoint1 = prevPoints[barData[j * 2].bars].prevPoints;
+            float3 oldPoint2 = prevPoints[barData[j*2 + 1].bars].prevPoints;
 
-				point1 += (point1 - oldPoint1) * t;
-				point2 += (point2 - oldPoint2) * t;
+            point1 += (point1 - oldPoint1) * t;
+            point2 += (point2 - oldPoint2) * t;
 
-				float3 delta = point2 - point1;
-				float3 position = (point1 + point2) * .5f;
-				quaternion rotation = quaternion.LookRotation(delta+0.001f,math.up());
-				float3 scale = new float3(barThicknessData[j].barThicknesses*timeData.timeSinceSpawn,
-											barThicknessData[j].barThicknesses*timeData.timeSinceSpawn,
-											math.sqrt(delta.x*delta.x+delta.y*delta.y+delta.z*delta.z)*timeData.timeSinceSpawn);
-				
-                //int index = i * constData.matricesPerRunner + j;
-				//matrices[index/instancesPerBatch][index%instancesPerBatch] = Matrix4x4.TRS(position,rotation,scale);
-                tran.Value = position;
-                rot.Value = rotation;
-                sca.Value = scale;
-				//colors[index / instancesPerBatch][index % instancesPerBatch] = colorData.color;
-                matCol.Value = colorData.color;
-			}
+            float3 delta = point2 - point1;
+            float3 position = (point1 + point2) * .5f;
+            quaternion rotation = quaternion.LookRotation(delta+0.001f,math.up());
+            float3 scale = new float3(barThicknessData[j].barThicknesses*timeData.timeSinceSpawn,
+                                        barThicknessData[j].barThicknesses*timeData.timeSinceSpawn,
+                                        math.sqrt(delta.x*delta.x+delta.y*delta.y+delta.z*delta.z)*timeData.timeSinceSpawn);
+            
+            tran.Value = position;
+            rot.Value = rotation;
+            sca.Value = scale;
+            matCol.Value = colorData.color;
+            
         }).Run();
     }
 }

@@ -150,13 +150,14 @@ public class RunnerSpawnSystem : SystemBase
         }).Run();
 
         //Spawn the bar cubes
-        var bufferBarsLength = 12;
+        var bufferBarsLength = 11;
         for(int i=0; i < newEntities.Length; i++)
         {
             newBars = EntityManager.Instantiate(barPrefab,bufferBarsLength,Allocator.Temp);
             for(int k=0; k < newBars.Length; k++)
             {
                 EntityManager.AddComponentData(newBars[k],new BelongsToRunnerData{entity = newEntities[i]});
+                EntityManager.AddComponentData(newBars[k],new BelongsToBarData{barID = k});
 
                 //FOR DEBUGGING
                 EntityManager.SetName(newBars[k],"Runner Bar");

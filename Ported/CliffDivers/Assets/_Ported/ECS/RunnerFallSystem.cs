@@ -12,6 +12,7 @@ public class RunnerFallSystem : SystemBase
     {
         Entities.WithAll<IsFallingTag>().ForEach
 		((
+			ref Translation tran,
 			ref DynamicBuffer<BufferPoints> points,
 			ref DynamicBuffer<BufferPrevPoints> prevPoints,
 			in RunnerConstantData constData, 
@@ -70,6 +71,10 @@ public class RunnerFallSystem : SystemBase
 				points[bufferBars[i * 2].bars] = new BufferPoints{points = point1};
 				points[bufferBars[i * 2 + 1].bars] = new BufferPoints{points = point2};
 			}
+
+			//Sync runner translation with first point
+			tran.Value = points[0].points;
+			
         }).Schedule();
     }
 }
