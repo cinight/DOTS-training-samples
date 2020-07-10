@@ -9,33 +9,36 @@ using Unity.Transforms;
 [UpdateAfter(typeof(PitGeneratonSystem))]
 public class RunnerSpawnSystem : SystemBase
 {
-    Entity spawnerEntity;
+    private EntityQuery q_Spawner;
     Entity barPrefab;
-    NativeArray<Entity> newEntities;
     NativeArray<Entity> newBars;
+
+   protected override void OnCreate()
+   {
+       q_Spawner = GetEntityQuery(ComponentType.ReadOnly<RunnerSpawnData>());
+   }
 
     protected override void OnUpdate()
     {
+        var spawnerEntities = q_Spawner.ToEntityArray(Allocator.TempJob);
+        if(spawnerEntities.Length == 0)
+        {
+            spawnerEntities.Dispose();
+            return;
+        } 
+
+        var spawnerEntity = spawnerEntities[0];
+
         //Spawn 2 Runner everyframe
         Entities.WithStructuralChanges().ForEach((Entity e, in RunnerSpawnData runnerSpawnData) => 
         {
-            spawnerEntity = e;
             barPrefab = runnerSpawnData.barPrefab;
-            newEntities = EntityManager.Instantiate(runnerSpawnData.runnerPrefab,2,Allocator.Temp);
+            var newEntities = EntityManager.Instantiate(runnerSpawnData.runnerPrefab,2,Allocator.Temp);
 
         }).Run();
 
-        //Get spawner settings
-        var spacingData = GetComponentDataFromEntity<RunnerSpawnerSpacingData>(false);
-        var spawnData = GetComponentDataFromEntity<RunnerSpawnData>(true);
-        var pitRadiusData = GetComponentDataFromEntity<PitRadiusData>(true);
-        float spacing = spacingData[spawnerEntity].Value;
-        float spawnAngle = spacingData[spawnerEntity].spawnAngle;
-        float pitRadius = pitRadiusData[spawnerEntity].Value;
-        float distanceFromPit = spawnData[spawnerEntity].distanceFromPit;
-
-        //Adding all the buggers
-        Entities.WithStructuralChanges().ForEach((Entity e) => 
+        //Adding all the buffers
+        Entities.WithStructuralChanges().WithAll<NotInitialisedTag>().ForEach((Entity e) => 
         {
             EntityManager.AddBuffer<BufferBars>(e);
             EntityManager.AddBuffer<BufferBarLengths>(e);
@@ -51,6 +54,16 @@ public class RunnerSpawnSystem : SystemBase
             EntityManager.SetName(e,"Runner");
 
         }).Run();
+
+        //Get spawner settings
+        var spacingData = GetComponentDataFromEntity<RunnerSpawnerSpacingData>(false);
+        var spawnData = GetComponentDataFromEntity<RunnerSpawnData>(true);
+        var pitRadiusData = GetComponentDataFromEntity<PitRadiusData>(true);
+        float spacing = spacingData[spawnerEntity].Value;
+        float spawnAngle = spacingData[spawnerEntity].spawnAngle;
+        float pitRadius = pitRadiusData[spawnerEntity].Value;
+        float distanceFromPit = spawnData[spawnerEntity].distanceFromPit;
+        spawnerEntities.Dispose();
 
         //Init runner
         float time = (float)Time.ElapsedTime;
