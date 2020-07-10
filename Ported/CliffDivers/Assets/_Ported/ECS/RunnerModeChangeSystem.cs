@@ -23,11 +23,14 @@ public class RunnerModeChangeSystem : SystemBase
 
         //time
         float time = (float)Time.ElapsedTime;
+        float fixedTime = Time.fixedDeltaTime;
         Random _random = new Random((uint)(173859*time));
 
         float runDirSway = RunnerMoveSystem.runDirSway;
+        float pitRadius = PitGenerator.pitRadius;
+        float runSpeed =  10f;
 
-        Entities.WithoutBurst().WithNone<IsFallingTag>()
+        Entities.WithNone<IsFallingTag>()
         .ForEach((
             Entity e, int entityInQueryIndex,
             ref DynamicBuffer<BufferBarLengths> barLengths,
@@ -39,9 +42,9 @@ public class RunnerModeChangeSystem : SystemBase
             ) => 
         {
             float distance = math.distance(tran.Value,0);
-            if (distance<PitGenerator.pitRadius+1.5f) 
+            if (distance<pitRadius+1.5f) 
             {
-                ecb.AddComponent(e,typeof(IsFallingTag));
+                ecb.AddComponent(e,new IsFallingTag{});
 
                 for (int i=0;i<barLengths.Length;i++) 
                 {
@@ -55,7 +58,7 @@ public class RunnerModeChangeSystem : SystemBase
                 runDir = math.normalize(runDir);
                 for (int i=0;i<points.Length;i++) 
                 {
-                    var pp = prevPoints[i].prevPoints*.5f + (points[i].points - runDir * RunnerManager.runSpeed * Time.fixedDeltaTime*(.5f+points[i].points.y*.5f / constData.shoulderHeight))*.5f;
+                    var pp = prevPoints[i].prevPoints*.5f + (points[i].points - runDir * runSpeed * fixedTime*(.5f+points[i].points.y*.5f / constData.shoulderHeight))*.5f;
                     prevPoints[i] = new BufferPrevPoints{prevPoints = pp};
                     
                     // jump
@@ -66,7 +69,7 @@ public class RunnerModeChangeSystem : SystemBase
                     }
                 }
 			}
-        }).Run();
+        }).Schedule();
 
         // Make sure that the ECB system knows about our job
         m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
