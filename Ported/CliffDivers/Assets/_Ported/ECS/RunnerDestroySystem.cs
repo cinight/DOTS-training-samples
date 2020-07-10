@@ -19,24 +19,24 @@ public class RunnerDestroySystem : SystemBase
 
     protected override void OnUpdate()
     {   
-        var ecb = m_EndSimulationEcbSystem.CreateCommandBuffer();
+        var ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
         //Destroy runner entity
         Entities.WithAll<IsFallingTag>().
-        ForEach((Entity e, in Translation tran, in DynamicBuffer<BufferBarEntities> barEntities) => 
+        ForEach((Entity e, int entityInQueryIndex, in Translation tran, in DynamicBuffer<BufferBarEntities> barEntities) => 
         {
             if (tran.Value.y<-150f) 
             {
                 //Destroy bar entities
                 for(int i = 0; i< barEntities.Length; i++)
                 {
-                    ecb.DestroyEntity(barEntities[i].entity);
+                    ecb.DestroyEntity(entityInQueryIndex,barEntities[i].entity);
                 }
 
-                ecb.DestroyEntity(e);
+                ecb.DestroyEntity(entityInQueryIndex,e);
                 //EntityManager.DestroyEntity(e);
             }
-        }).Schedule();
+        }).ScheduleParallel();
 
         // Make sure that the ECB system knows about our job
         m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);

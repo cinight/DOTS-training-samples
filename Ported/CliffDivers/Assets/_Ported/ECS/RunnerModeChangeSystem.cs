@@ -19,7 +19,7 @@ public class RunnerModeChangeSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var ecb = m_EndSimulationEcbSystem.CreateCommandBuffer();
+        var ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
         //time
         float time = (float)Time.ElapsedTime;
@@ -44,7 +44,7 @@ public class RunnerModeChangeSystem : SystemBase
             float distance = math.distance(tran.Value,0);
             if (distance<pitRadius+1.5f) 
             {
-                ecb.AddComponent(e,new IsFallingTag{});
+                ecb.AddComponent(entityInQueryIndex,e,new IsFallingTag{});
 
                 for (int i=0;i<barLengths.Length;i++) 
                 {
@@ -69,7 +69,7 @@ public class RunnerModeChangeSystem : SystemBase
                     }
                 }
 			}
-        }).Schedule();
+        }).ScheduleParallel();
 
         // Make sure that the ECB system knows about our job
         m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
