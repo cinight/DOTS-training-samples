@@ -6,7 +6,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 
-[UpdateAfter(typeof(RunnerDestroySystem))]
+[UpdateAfter(typeof(RunnerFallSystem))]
 public class BodyPartRenderSystem : SystemBase
 {
     protected override void OnUpdate()
@@ -60,7 +60,7 @@ public class BodyPartRenderSystem : SystemBase
             rot.Value = rotation;
             sca.Value = scale;
             matCol.Value = colorData.color;
-            
+
         }).Run();
     }
 }

@@ -39,13 +39,13 @@ public class RunnerFallSystem : SystemBase
 
 				prevPoint.y += .005f;
 
-				prevPoint.x-=(points[i].points.x - averagePos.x) * constData.spreadForce;
-				prevPoint.y-=(points[i].points.y - averagePos.y) * constData.spreadForce;
-				prevPoint.z-=(points[i].points.z - averagePos.z) * constData.spreadForce;
+				prevPoint.x-=(point.x - averagePos.x) * constData.spreadForce;
+				prevPoint.y-=(point.y - averagePos.y) * constData.spreadForce;
+				prevPoint.z-=(point.z - averagePos.z) * constData.spreadForce;
 
-				point.x += (points[i].points.x - prevPoints[i].prevPoints.x)*(1f-constData.xzDamping);
-				point.y += points[i].points.y - prevPoints[i].prevPoints.y;
-				point.z += (points[i].points.z - prevPoints[i].prevPoints.z)*(1f-constData.xzDamping);
+				point.x += (point.x - prevPoint.x)*(1f-constData.xzDamping);
+				point.y += point.y - prevPoint.y;
+				point.z += (point.z - prevPoint.z)*(1f-constData.xzDamping);
 				prevPoint = startPos;
 
 				prevPoints[i] = new BufferPrevPoints{prevPoints = prevPoint};
@@ -74,7 +74,7 @@ public class RunnerFallSystem : SystemBase
 
 			//Sync runner translation with first point
 			tran.Value = points[0].points;
-			
+
         }).Schedule();
     }
 }

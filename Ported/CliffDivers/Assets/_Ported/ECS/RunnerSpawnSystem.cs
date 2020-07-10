@@ -171,6 +171,6 @@ public class RunnerSpawnSystem : SystemBase
         EntityManager.RemoveComponent(newEntities,typeof(NotInitialisedTag));
 
         //Just for debug
-        this.Enabled = false;
+        //this.Enabled = false;
     }
 }
