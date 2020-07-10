@@ -3,6 +3,12 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 [InternalBufferCapacity(8)]
+public struct BufferBarEntities : IBufferElementData
+{
+    public Entity entity;
+}
+
+[InternalBufferCapacity(8)]
 public struct BufferBars : IBufferElementData
 {
     public int bars;
