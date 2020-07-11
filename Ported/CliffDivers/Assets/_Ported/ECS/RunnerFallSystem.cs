@@ -20,16 +20,12 @@ public class RunnerFallSystem : SystemBase
 			in DynamicBuffer<BufferBarLengths> barLengths
 			) => 
         {
-			float averageX=0f;
-			float averageY=0f;
-			float averageZ=0f;
+			float3 average=0f;
 			for (int i=0;i<points.Length;i++) 
 			{
-				averageX += points[i].points.x;
-				averageY += points[i].points.y;
-				averageZ += points[i].points.z;
+				average += points[i].points;
 			}
-			float3 averagePos = new float3(averageX / points.Length,averageY / points.Length,averageZ / points.Length);
+			float3 averagePos = average / points.Length;
 
 			for (int i=0;i<points.Length;i++) 
 			{
@@ -38,10 +34,7 @@ public class RunnerFallSystem : SystemBase
                 var point = points[i].points;
 
 				prevPoint.y += .005f;
-
-				prevPoint.x-=(point.x - averagePos.x) * constData.spreadForce;
-				prevPoint.y-=(point.y - averagePos.y) * constData.spreadForce;
-				prevPoint.z-=(point.z - averagePos.z) * constData.spreadForce;
+				prevPoint -=(point - averagePos) * constData.spreadForce;
 
 				point.x += (point.x - prevPoint.x)*(1f-constData.xzDamping);
 				point.y += point.y - prevPoint.y;
@@ -56,17 +49,11 @@ public class RunnerFallSystem : SystemBase
 			{
 				float3 point1 = points[bufferBars[i * 2].bars].points;
 				float3 point2 = points[bufferBars[i * 2 + 1].bars].points;
-				float dx = point1.x - point2.x;
-				float dy = point1.y - point2.y;
-				float dz = point1.z - point2.z;
-				float dist = math.sqrt(dx * dx + dy * dy + dz * dz);
+				float3 d = point1 - point2;
+				float dist = math.sqrt(d.x * d.x + d.y * d.y + d.z * d.z);
 				float pushDist = (dist - barLengths[i].barLengths)*.5f/dist;
-				point1.x -= dx * pushDist;
-				point1.y -= dy * pushDist;
-				point1.z -= dz * pushDist;
-				point2.x += dx * pushDist;
-				point2.y += dy * pushDist;
-				point2.z += dz * pushDist;
+				point1 -= d * pushDist;
+				point2 += d * pushDist;
 
 				points[bufferBars[i * 2].bars] = new BufferPoints{points = point1};
 				points[bufferBars[i * 2 + 1].bars] = new BufferPoints{points = point2};
