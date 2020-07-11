@@ -114,7 +114,9 @@ public class BufferBarComponent : MonoBehaviour, IConvertGameObjectToEntity
         var feetAnimating = dstManager.AddBuffer<BufferFeetAnimating>(entity);
         for (int i = 0; i < 2; i++) feetAnimating.Add(new BufferFeetAnimating{feetAnimating = true});
 
+        #if UNITY_EDITOR
         dstManager.SetName(entity,"Runner");
         Debug.Log("converted");
+        #endif
     }
 }
