@@ -65,7 +65,7 @@ public class RunnerMoveSystem : SystemBase
         runDirSway = math.sin((float)Time.ElapsedTime * .5f) * .5f;
 
         //Save PrevPoints
-        Entities.WithNone<IsFallingTag>().ForEach
+        Entities.WithNone<NotInitialisedTag>().WithNone<IsFallingTag>().ForEach
         ((
             ref DynamicBuffer<BufferPrevPoints> prevPoints,
             in DynamicBuffer<BufferPoints> points
@@ -76,14 +76,14 @@ public class RunnerMoveSystem : SystemBase
 				prevPoints[i] = new BufferPrevPoints{prevPoints = points[i].points};
 			}
 
-        }).Schedule();
+        }).ScheduleParallel();
 
         var runDirSway_temp = runDirSway;
 
         //Update body part
         float deltatime = Time.DeltaTime;
         float fixedDeltaTime = UnityEngine.Time.fixedDeltaTime;
-        Entities.WithNone<IsFallingTag>().ForEach
+        Entities.WithNone<NotInitialisedTag>().WithNone<IsFallingTag>().ForEach
         ((
             ref DynamicBuffer<BufferPoints> points,
             ref DynamicBuffer<BufferFootTargets> footTargets,

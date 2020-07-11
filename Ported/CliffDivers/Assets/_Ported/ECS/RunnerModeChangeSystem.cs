@@ -29,7 +29,7 @@ public class RunnerModeChangeSystem : SystemBase
         float pitRadius = PitGenerator.pitRadius;
         float runSpeed =  10f;
 
-        Entities.WithNone<IsFallingTag>()
+        Entities.WithNone<NotInitialisedTag>().WithNone<IsFallingTag>()
         .ForEach((
             Entity e, int entityInQueryIndex,
             ref DynamicBuffer<BufferBarLengths> barLengths,
