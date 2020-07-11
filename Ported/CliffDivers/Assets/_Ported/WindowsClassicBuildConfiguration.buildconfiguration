@@ -1,0 +1,28 @@
+{
+    "Dependencies": [],
+    "Components": [
+        {
+            "$type": "Unity.Build.Common.GeneralSettings, Unity.Build",
+            "ProductName": "CliffDiverPorted",
+            "CompanyName": "Unity"
+        },
+        {
+            "$type": "Unity.Build.Common.SceneList, Unity.Build",
+            "$version": 1,
+            "BuildCurrentScene": false,
+            "SceneInfos": [
+                {
+                    "Scene": "GlobalObjectId_V1-1-af7c970453191be4caef7ed76f4209ab-102900000-0",
+                    "AutoLoad": false
+                }
+            ]
+        },
+        {
+            "$type": "Unity.Build.Classic.ClassicBuildProfile, Unity.Build.Classic",
+            "$version": 1,
+            "Platform": "Windows",
+            "Configuration": 2,
+            "Incremental": false
+        }
+    ]
+}
