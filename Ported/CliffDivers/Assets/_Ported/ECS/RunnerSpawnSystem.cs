@@ -126,7 +126,7 @@ public class RunnerSpawnSystem : SystemBase
             runnerSpawnerSpacingData.spawnAngle = spawnAngle;
             runnerSpawnerSpacingData.Value = spacing;
 
-        }).Run();
+        }).Schedule();
         
         m_EcbSystem.AddJobHandleForProducer(this.Dependency);
 
