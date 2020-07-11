@@ -12,9 +12,8 @@ public class RunnerModeChangeSystem : SystemBase
     protected override void OnCreate()
     {
         base.OnCreate();
-        // Find the ECB system once and store it for later usage
-        m_EndSimulationEcbSystem = World
-            .GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+
+        m_EndSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
@@ -75,5 +74,3 @@ public class RunnerModeChangeSystem : SystemBase
         m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
     }
 }
-
-//NEED OPTIMIZATION

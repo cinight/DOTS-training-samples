@@ -75,6 +75,6 @@ public class RunnerFallSystem : SystemBase
 			//Sync runner translation with first point
 			tran.Value = points[0].points;
 
-        }).Schedule();
+        }).ScheduleParallel();
     }
 }

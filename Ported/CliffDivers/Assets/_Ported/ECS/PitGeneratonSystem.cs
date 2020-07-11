@@ -32,14 +32,17 @@ public class PitGeneratonSystem : SystemBase
 		List<Vector3> vertices = new List<Vector3>();
 		List<int> triangles = new List<int>();
 
-		for (int i=-pitRingCount;i<pitRingCount;i++) {
-			for (int j = 0; j < quadsPerRing; j++) {
+		for (int i=-pitRingCount;i<pitRingCount;i++) 
+		{
+			for (int j = 0; j < quadsPerRing; j++) 
+			{
 				float angle1 = j / (float)quadsPerRing * Mathf.PI*2f;
 				float angle2 = (j + 1f) / quadsPerRing * Mathf.PI*2f;
 
 				Vector3 pos1, pos2, pos3, pos4;
 
-				if (i < 0) {
+				if (i < 0) 
+				{
 					pos1 = new Vector3(Mathf.Cos(angle1) * (pitRadius - i * ringHeight),
 											   0f,
 											   Mathf.Sin(angle1) * (pitRadius - i * ringHeight));
@@ -52,7 +55,9 @@ public class PitGeneratonSystem : SystemBase
 					pos4 = new Vector3(Mathf.Cos(angle2) * (pitRadius-(i+1f)*ringHeight),
 											   0f,
 											   Mathf.Sin(angle2) * (pitRadius-(i+1f)*ringHeight));
-				} else {
+				} 
+				else 
+				{
 					pos1 = new Vector3(Mathf.Cos(angle1) * pitRadius,
 											   -i * ringHeight,
 											   Mathf.Sin(angle1) * pitRadius);

@@ -79,5 +79,3 @@ public class BodyPartRenderSystem : SystemBase
         }).ScheduleParallel();
     }
 }
-
-//NEED OPTIMIZATION

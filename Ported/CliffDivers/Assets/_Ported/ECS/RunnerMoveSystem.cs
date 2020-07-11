@@ -146,28 +146,6 @@ public class RunnerMoveSystem : SystemBase
 			points = UpdateLimb(points,0,2,1,constData.legLength,perp);
 			points = UpdateLimb(points,0,4,3,constData.legLength,perp);
 
-            //Job for knees
-            // var job = new UpdateLimbJob()
-            // {
-            //     moveDataType = moveDataType,
-            //     index1 = 0,
-            //     index2 = 2,
-            //     jointIndex = 1,
-            //     length = constData.legLength,
-            //     perp = perp
-            // };
-            // Dependency = job.Schedule(m_Group, Dependency);
-            // job = new UpdateLimbJob()
-            // {
-            //     moveDataType = moveDataType,
-            //     index1 = 0,
-            //     index2 = 4,
-            //     jointIndex = 3,
-            //     length = constData.legLength,
-            //     perp = perp
-            // };
-            // Dependency = job.Schedule(m_Group, Dependency);
-
 			// shoulders
             points[6] = new BufferPoints{points = 
             new float3(tran.Value.x + runDir.x * runSpeed * .075f,
@@ -200,5 +178,3 @@ public class RunnerMoveSystem : SystemBase
         }).ScheduleParallel();
     }
 }
-
-//NEED OPTIMIZATION

@@ -12,9 +12,7 @@ public class RunnerDestroySystem : SystemBase
     protected override void OnCreate()
     {
         base.OnCreate();
-        // Find the ECB system once and store it for later usage
-        m_EndSimulationEcbSystem = World
-            .GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        m_EndSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
@@ -34,7 +32,6 @@ public class RunnerDestroySystem : SystemBase
                 }
 
                 ecb.DestroyEntity(entityInQueryIndex,e);
-                //EntityManager.DestroyEntity(e);
             }
         }).ScheduleParallel();
 
@@ -42,5 +39,3 @@ public class RunnerDestroySystem : SystemBase
         m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
     }
 }
-
-//NEED OPTIMIZATION

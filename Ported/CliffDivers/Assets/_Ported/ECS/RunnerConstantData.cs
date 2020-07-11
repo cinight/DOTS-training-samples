@@ -4,7 +4,7 @@ using Unity.Entities;
 [GenerateAuthoringComponent]
 public struct RunnerConstantData : IComponentData
 {
-	public int matricesPerRunner;
+	//public int matricesPerRunner;
 	public float hipHeight;
 	public float shoulderHeight;
 	public float stanceWidth;
