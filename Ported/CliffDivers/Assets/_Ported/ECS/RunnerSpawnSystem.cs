@@ -33,8 +33,8 @@ public class RunnerSpawnSystem : SystemBase
                 for(int k=0; k < bufferBarsLength; k++)
                 {
                     var newBar = ecb.Instantiate(entityInQueryIndex,runnerSpawnData.barPrefab);
-                    ecb.AddComponent(entityInQueryIndex,newBar,new BelongsToRunnerData{entity = newRunner});
-                    ecb.AddComponent(entityInQueryIndex,newBar,new BelongsToBarData{barID = k});
+                    ecb.SetComponent(entityInQueryIndex,newBar,new BelongsToRunnerData{entity = newRunner});
+                    ecb.SetComponent(entityInQueryIndex,newBar,new BelongsToBarData{barID = k});
                     bufferBarEntities.Add(new BufferBarEntities{entity = newBar});
                     
                     //FOR DEBUGGING

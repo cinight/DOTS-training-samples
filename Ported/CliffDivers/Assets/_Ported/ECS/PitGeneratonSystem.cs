@@ -11,8 +11,6 @@ using UnityEngine.Rendering;
 
 public class PitGeneratonSystem : SystemBase
 {
-    
-
 	public Vector3 DistortPoint(Vector3 point, float pitRadius) 
     {
 		float dist = Mathf.Sqrt(point.x * point.x + point.z * point.z)-pitRadius;

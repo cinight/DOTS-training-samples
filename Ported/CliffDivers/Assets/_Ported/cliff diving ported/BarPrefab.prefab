@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 6111104544641377922}
   - component: {fileID: 6111104544641377921}
   - component: {fileID: 1411521722766920682}
+  - component: {fileID: 1294493474896847081}
+  - component: {fileID: -1289757589431537070}
   m_Layer: 0
   m_Name: BarPrefab
   m_TagString: Untagged
@@ -95,3 +97,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   color: {r: 0.022774577, g: 1, b: 0, a: 1}
+--- !u!114 &1294493474896847081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6111104544641377927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8517125c35c49943ba75bcb5e7fb73c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  barID: 0
+--- !u!114 &-1289757589431537070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6111104544641377927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8edafbb938114c240af551fc68ecc98b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entity: {fileID: 0}
